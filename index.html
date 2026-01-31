@@ -3,105 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Beaver Clicker Premium</title>
+    <title>Beaver Clicker</title>
     <style>
-        body { background: radial-gradient(circle, #2c3e50, #000000); color: white; font-family: sans-serif; text-align: center; margin: 0; overflow: hidden; }
-        .stats { font-size: 28px; margin-top: 20px; color: #f1c40f; text-shadow: 2px 2px 4px #000; }
-        .status { font-size: 14px; color: #bdc3c7; margin-bottom: 10px; }
-        #game-container { position: relative; width: 220px; height: 220px; margin: 30px auto; }
-        #beaver { width: 100%; position: absolute; bottom: 0; left: 0; transition: transform 0.05s; z-index: 1; cursor: pointer; }
-        #accessory { width: 70%; position: absolute; top: -10%; left: 15%; z-index: 2; display: none; pointer-events: none; }
+        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; }
+        .stats { font-size: 32px; margin-top: 20px; font-weight: bold; }
+        #game-area { position: relative; width: 250px; height: 250px; margin: 20px auto; }
+        #beaver { width: 100%; cursor: pointer; transition: transform 0.05s; z-index: 1; position: relative; }
+        #accessory { position: absolute; width: 60%; top: 5%; left: 20%; z-index: 2; pointer-events: none; display: none; }
         #beaver:active { transform: scale(0.9); }
-        .menu { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-        .btn { padding: 12px 20px; background: #e67e22; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        #shop { display: none; background: rgba(0,0,0,0.9); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pt: 40px; }
-        .shop-item { background: #34495e; margin: 10px auto; padding: 15px; width: 85%; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .menu-btns { margin-top: 20px; }
+        .btn { padding: 15px 25px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-size: 18px; margin: 5px; }
+        #shop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10; padding-top: 40px; }
+        .item { background: #34495e; margin: 10px auto; padding: 15px; width: 80%; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
     <div class="stats">💰 <span id="balance">0</span></div>
-    <div class="status">Статус: <b id="rank">Бедный бобр</b> | Клик: +<span id="power">1</span> | Авто: <span id="auto">0</span></div>
     
-    <div id="game-container">
+    <div id="game-area">
         <img id="beaver" src="https://img.icons8.com/color/344/beaver.png">
         <img id="accessory" src="">
     </div>
 
-    <div class="menu">
-        <button class="btn" onclick="document.getElementById('shop').style.display='block'">🏪 МАГАЗИН</button>
+    <div class="menu-btns">
+        <button class="btn" onclick="showShop(true)">МАГАЗИН</button>
     </div>
 
     <div id="shop">
-        <h2 style="color: #f1c40f;">УЛУЧШЕНИЯ</h2>
-        <div id="shop-list"></div>
-        <button class="btn" style="background: #c0392b; margin-top: 20px;" onclick="document.getElementById('shop').style.display='none'">ЗАКРЫТЬ</button>
+        <h2>УЛУЧШЕНИЯ</h2>
+        <div id="items-list"></div>
+        <button class="btn" style="background:#c0392b" onclick="showShop(false)">ЗАКРЫТЬ</button>
     </div>
 
-    <audio id="click-snd" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
-    <audio id="bg-music" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
+    <audio id="snd-click" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
 
     <script>
         let bal = parseInt(localStorage.getItem('b_bal')) || 0;
-        let pow = parseInt(localStorage.getItem('b_pow')) || 1;
+        let pwr = parseInt(localStorage.getItem('b_pwr')) || 1;
         let auto = parseInt(localStorage.getItem('b_auto')) || 0;
-        let acc = localStorage.getItem('b_acc') || "";
+        let accImg = localStorage.getItem('b_acc') || "";
 
-        const ranks = [
-            {m: 0, n: "Бедный бобр"}, {m: 5000, n: "Бобр-работяга"}, {m: 50000, n: "Модный бобр"},
-            {m: 500000, n: "Миллионер"}, {m: 5000000, n: "Магнат"}, {m: 15000000, n: "Бог бобров"}
-        ];
-
-        const goods = [
+        const shopItems = [
             {n: "🎩 Шляпа", p: 10, b: 1, img: "https://img.icons8.com/color/200/top-hat.png"},
             {n: "🕶 Очки", p: 150, b: 5, img: "https://img.icons8.com/color/200/sunglasses.png"},
-            {n: "🤖 Автокликер", p: 3000, b: 0, a: 1},
-            {n: "👑 Корона", p: 100000, b: 500, img: "https://img.icons8.com/color/200/crown.png"}
+            {n: "🤖 Авто", p: 3000, a: 1}
         ];
 
         function update() {
             document.getElementById('balance').innerText = Math.floor(bal).toLocaleString();
-            document.getElementById('power').innerText = pow;
-            document.getElementById('auto').innerText = auto;
-            let currentRank = ranks[0].n;
-            ranks.forEach(r => { if(bal >= r.m) currentRank = r.n; });
-            document.getElementById('rank').innerText = currentRank;
-            const accImg = document.getElementById('accessory');
-            if(acc) { accImg.src = acc; accImg.style.display = 'block'; }
+            const acc = document.getElementById('accessory');
+            if(accImg) { acc.src = accImg; acc.style.display = 'block'; }
             localStorage.setItem('b_bal', bal);
-            localStorage.setItem('b_pow', pow);
+            localStorage.setItem('b_pwr', pwr);
             localStorage.setItem('b_auto', auto);
-            localStorage.setItem('b_acc', acc);
+            localStorage.setItem('b_acc', accImg);
         }
 
         document.getElementById('beaver').onclick = () => {
-            bal += pow;
-            document.getElementById('click-snd').currentTime = 0;
-            document.getElementById('click-snd').play();
-            document.getElementById('bg-music').play();
+            bal += pwr;
+            const s = document.getElementById('snd-click');
+            s.volume = 0.3; // Тихий звук
+            s.currentTime = 0; s.play();
             update();
         };
 
-        function buy(i) {
-            let item = goods[i];
-            if(bal >= item.p) {
-                bal -= item.p;
-                if(item.a) auto += item.a;
-                else { pow += item.b; acc = item.img; }
-                update();
-            } else alert("Мало монет!");
+        function showShop(v) {
+            document.getElementById('shop').style.display = v ? 'block' : 'none';
+            if(v) {
+                const list = document.getElementById('items-list');
+                list.innerHTML = '';
+                shopItems.forEach((it, i) => {
+                    list.innerHTML += `<div class="item"><span>${it.n}</span><button class="btn" onclick="buy(${i})">${it.p}</button></div>`;
+                });
+            }
         }
 
-        const list = document.getElementById('shop-list');
-        goods.forEach((item, i) => {
-            list.innerHTML += `<div class="shop-item"><span>${item.n}</span><button class="btn" onclick="buy(${i})">${item.p}💰</button></div>`;
-        });
+        function buy(i) {
+            let it = shopItems[i];
+            if(bal >= it.p) {
+                bal -= it.p;
+                if(it.a) auto += it.a;
+                else { pwr += it.b; accImg = it.img; }
+                update();
+                showShop(true);
+            } else alert("Мало монет!");
+        }
 
         setInterval(() => { if(auto > 0) { bal += auto; update(); } }, 1000);
         update();
     </script>
 </body>
 </html>
-
-
-
-
