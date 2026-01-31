@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #1a1a1a; color: white; text-align: center; font-family: sans-serif; user-select: none; }
+        .header { margin-top: 20px; font-size: 22px; color: #f1c40f; font-weight: bold; min-height: 30px; }
+        #beaver { font-size: 120px; margin: 20px 0; cursor: pointer; transition: transform 0.1s; display: inline-block; }
+        #beaver:active { transform: scale(0.95); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; background: #2c3e50; border-radius: 15px; margin: 10px; }
+        .item { background: #34495e; padding: 10px; margin: 5px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .btn-buy { background: #27ae60; border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header" id="title">🐹 Малыш Бобер</div>
+    <div id="beaver">🦫</div>
+    <div class="stats-grid">
+        <div onclick="adminClick()">💰: <span id="balance">0</span></div>
+        <div>📈 Сила: <span id="power">1</span></div>
+        <div>📊 Клики: <span id="clicks">0</span></div>
+        <div>⭐ Лвл: <span id="lvl">1</span></div>
+    </div>
+    <div class="shop">
+        <div class="item"><span>🪚 Пила (+2)</span><button class="btn-buy" onclick="buy(200, 2)">200</button></div>
+        <div class="item"><span>🚜 Трактор (+10)</span><button class="btn-buy" onclick="buy(1500, 10)">1500</button></div>
+        <div class="item"><span>🏭 Завод (+50)</span><button class="btn-buy" onclick="buy(10000, 50)">10000</button></div>
+    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        let clicks = parseInt(localStorage.getItem('clicks')) || 0;
+        let balance = parseInt(localStorage.getItem('balance')) || 0;
+        let power = parseInt(localStorage.getItem('power')) || 1;
+        let aClicks = 0;
+        function updateUI() {
+            document.getElementById('clicks').innerText = clicks;
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('power').innerText = power;
+            let lvl = Math.floor(clicks / 100) + 1;
+            document.getElementById('lvl').innerText = lvl;
+            let t = "🐹 Малыш Бобер";
+            if(lvl >= 2) t = "👷 Бобер-Строитель";
+            if(lvl >= 3) t = "🪚 Старший Плотник";
+            if(lvl >= 4) t = "🚜 Лесной Бригадир";
+            if(lvl >= 5) t = "🏰 Лорд Плотник";
+            if(lvl >= 10) t = "👑 Император Леса";
+            document.getElementById('title').innerText = t;
+            localStorage.setItem('clicks', clicks);
+            localStorage.setItem('balance', balance);
+            localStorage.setItem('power', power);
+        }
+        function adminClick() {
+            aClicks++;
+            if(aClicks >= 5) {
+                balance += 1000000; aClicks = 0;
+                tg.showAlert("👑 АДМИН: +1,000,000 монет!");
+                updateUI();
+            }
+        }
+        document.getElementById('beaver').onclick = () => {
+            clicks++; balance += power;
+            updateUI();
+            tg.HapticFeedback.impactOccurred('light');
+        };
+        function buy(c, a) {
+            if(balance >= c) { balance -= c; power += a; updateUI(); }
+            else { tg.showAlert("Мало монет!"); }
+        }
+        updateUI();
+        tg.expand();
+    </script>
+</body>
+</html>
