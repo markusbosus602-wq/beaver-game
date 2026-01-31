@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Beaver Classic</title>
+    <title>Beaver Clicker</title>
     <style>
-        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; }
-        .stats { font-size: 24px; margin: 20px; }
-        #game { position: relative; width: 200px; height: 200px; margin: 0 auto; }
-        #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
+        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; touch-action: manipulation; }
+        .stats { font-size: 26px; margin: 20px; font-weight: bold; }
+        #game { position: relative; width: 220px; height: 220px; margin: 0 auto; }
+        #beaver { width: 100%; cursor: pointer; transition: transform 0.05s; z-index: 1; position: relative; }
         #acc { position: absolute; width: 50%; top: 5%; left: 25%; z-index: 2; pointer-events: none; }
-        #beaver:active { transform: scale(0.9); }
-        .btns { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .btn { padding: 10px 20px; background: #e67e22; border: none; color: white; cursor: pointer; width: 180px; }
-        #shop, #settings { display: none; background: rgba(0,0,0,0.9); position: fixed; top:0; left:0; width:100%; height:100%; z-index:10; overflow-y: auto; }
-        .item { border-bottom: 1px solid #555; padding: 10px; display: flex; justify-content: space-between; align-items: center; width: 90%; margin: auto; }
+        #beaver:active { transform: scale(0.95); }
+        .btns { margin-top: 25px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .btn { padding: 12px 25px; background: #e67e22; border: none; color: white; cursor: pointer; width: 200px; border-radius: 5px; font-weight: bold; }
+        #shop, #settings { display: none; background: rgba(0,0,0,0.96); position: fixed; top:0; left:0; width:100%; height:100%; z-index:10; overflow-y: auto; padding-top: 20px; }
+        .item { border-bottom: 1px solid #444; padding: 15px; display: flex; justify-content: space-between; align-items: center; width: 90%; margin: auto; }
     </style>
 </head>
 <body>
@@ -27,85 +27,62 @@
         <button class="btn" onclick="openP('shop')" id="l-shop">МАГАЗИН</button>
         <button class="btn" onclick="openP('settings')" id="l-set">НАСТРОЙКИ</button>
     </div>
-
     <div id="shop">
-        <h2 id="l-sh-t">УЛУЧШЕНИЯ</h2>
+        <h2 id="l-sh-t">МАГАЗИН</h2>
         <div id="list"></div>
-        <button class="btn" onclick="closeP('shop')">X</button>
+        <button class="btn" style="background:#c0392b" onclick="closeP('shop')">ЗАКРЫТЬ</button>
     </div>
-
     <div id="settings">
         <h2 id="l-se-t">НАСТРОЙКИ</h2>
         <button class="btn" onclick="toggleM()" id="l-m">Музыка: ВКЛ</button>
         <button class="btn" onclick="toggleS()" id="l-s">Звуки: ВКЛ</button>
         <button class="btn" onclick="chL()">Language: RU</button>
-        <button class="btn" onclick="closeP('settings')">OK</button>
+        <button class="btn" style="background:#2ecc71" onclick="closeP('settings')">OK</button>
     </div>
-
     <audio id="hru-snd" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
     <audio id="bg-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
-
     <script>
         let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, 
             snd = localStorage.getItem('snd') !== '0', mus = localStorage.getItem('mus') !== '0',
             lng = localStorage.getItem('lng') || 'RU', img = localStorage.getItem('img') || "";
-
         const items = [
             {n:{RU:"Шляпа",EN:"Hat"},p:10,pw:1,i:"https://img.icons8.com/color/100/top-hat.png"},
-            {n:{RU:"Очки",EN:"Glasses"},p:100,pw:5,i:"https://img.icons8.com/color/100/sunglasses.png"},
+            {n:{RU:"Очки",EN:"Glasses"},p:150,pw:5,i:"https://img.icons8.com/color/100/sunglasses.png"},
             {n:{RU:"Галстук",EN:"Tie"},p:500,pw:10,i:"https://img.icons8.com/color/100/tie.png"},
-            {n:{RU:"Кепка",EN:"Cap"},p:1000,pw:20,i:"https://img.icons8.com/color/100/baseball-cap.png"},
-            {n:{RU:"Усы",EN:"Moustache"},p:5000,pw:50,i:"https://img.icons8.com/color/100/mustache.png"},
-            {n:{RU:"Маска",EN:"Mask"},p:10000,pw:100,i:"https://img.icons8.com/color/100/protection-mask.png"},
-            {n:{RU:"Медаль",EN:"Medal"},p:50000,pw:500,i:"https://img.icons8.com/color/100/medal.png"},
-            {n:{RU:"Корона",EN:"Crown"},p:150000,pw:2000,i:"https://img.icons8.com/color/100/crown.png"},
-            {n:{RU:"Нимб",EN:"Halo"},p:1000000,pw:10000,i:"https://img.icons8.com/color/100/angel.png"},
-            {n:{RU:"Алмаз",EN:"Diamond"},p:5000000,pw:50000,i:"https://img.icons8.com/color/100/diamond.png"}
+            {n:{RU:"Кепка",EN:"Cap"},p:1500,pw:25,i:"https://img.icons8.com/color/100/baseball-cap.png"},
+            {n:{RU:"Усы",EN:"Mustache"},p:4000,pw:60,i:"https://img.icons8.com/color/100/mustache.png"},
+            {n:{RU:"Маска",EN:"Mask"},p:10000,pw:150,i:"https://img.icons8.com/color/100/protection-mask.png"},
+            {n:{RU:"Медаль",EN:"Medal"},p:50000,pw:600,i:"https://img.icons8.com/color/100/medal.png"},
+            {n:{RU:"Корона",EN:"Crown"},p:200000,pw:2500,i:"https://img.icons8.com/color/100/crown.png"},
+            {n:{RU:"Нимб",EN:"Halo"},p:1000000,pw:12000,i:"https://img.icons8.com/color/100/angel.png"},
+            {n:{RU:"Алмаз",EN:"Diamond"},p:5000000,pw:60000,i:"https://img.icons8.com/color/100/diamond.png"}
         ];
-
         function up() {
-            document.getElementById('balance').innerText = b;
+            document.getElementById('balance').innerText = Math.floor(b).toLocaleString();
             const a = document.getElementById('acc');
             if(img){ a.src=img; a.style.display='block'; }
             localStorage.setItem('b',b); localStorage.setItem('p',p); localStorage.setItem('img',img);
             t();
         }
-
         function t() {
-            const texts = {
-                RU: {bal:"Монеты", shop:"МАГАЗИН", set:"НАСТРОЙКИ", sh_t:"МАГАЗИН", se_t:"НАСТРОЙКИ", m:mus?"Музыка: ВКЛ":"Музыка: ВЫКЛ", s:snd?"Звуки: ВКЛ":"Звуки: ВЫКЛ"},
-                EN: {bal:"Coins", shop:"SHOP", set:"SETTINGS", sh_t:"SHOP", se_t:"SETTINGS", m:mus?"Music: ON":"Music: OFF", s:snd?"Sounds: ON":"Sounds: OFF"}
-            };
-            const l = texts[lng];
-            document.getElementById('l-bal').innerText = l.bal;
-            document.getElementById('l-shop').innerText = l.shop;
-            document.getElementById('l-set').innerText = l.set;
-            document.getElementById('l-m').innerText = l.m;
-            document.getElementById('l-s').innerText = l.s;
+            const txt = {RU:{bal:"Монеты",shop:"МАГАЗИН",set:"НАСТРОЙКИ",m:mus?"Музыка: ВКЛ":"Музыка: ВЫКЛ",s:snd?"Звуки: ВКЛ":"Звуки: ВЫКЛ"},EN:{bal:"Coins",shop:"SHOP",set:"SETTINGS",m:mus?"Music: ON":"Music: OFF",s:snd?"Sounds: ON":"Sounds: OFF"}}[lng];
+            document.getElementById('l-bal').innerText = txt.bal; document.getElementById('l-shop').innerText = txt.shop;
+            document.getElementById('l-set').innerText = txt.set; document.getElementById('l-m').innerText = txt.m; document.getElementById('l-s').innerText = txt.s;
         }
-
         document.getElementById('beaver').onclick = () => {
-            b += p; if(snd){ const s=document.getElementById('hru-snd'); s.volume=0.2; s.currentTime=0; s.play(); }
-            if(mus) { const m=document.getElementById('bg-m'); m.volume=0.2; m.play(); }
-            up();
+            b += p; if(snd){ const s=document.getElementById('hru-snd'); s.volume=0.1; s.currentTime=0; s.play(); }
+            if(mus) { const m=document.getElementById('bg-m'); m.volume=0.1; m.play(); } up();
         };
-
-        function buy(i) {
-            const it = items[i];
-            if(b >= it.p) { b -= it.p; p += it.pw; img = it.i; up(); closeP('shop'); }
-        }
-
+        function buy(i) { const it = items[i]; if(b >= it.p) { b -= it.p; p += it.pw; img = it.i; up(); } }
         function openP(id) {
             document.getElementById(id).style.display='block';
             if(id==='shop'){
                 const l = document.getElementById('list'); l.innerHTML='';
-                items.forEach((it, i) => {
-                    l.innerHTML += `<div class="item"><span>${it.n[lng]} (+${it.pw})</span><button class="btn" style="width:80px" onclick="buy(${i})">${it.p}</button></div>`;
-                });
+                items.forEach((it, i) => { l.innerHTML += `<div class="item"><span>${it.n[lng]} (+${it.pw})</span><button class="btn" style="width:80px" onclick="buy(${i})">${it.p}</button></div>`; });
             }
         }
         function closeP(id){ document.getElementById(id).style.display='none'; }
-        function toggleM(){ mus=!mus; localStorage.setItem('mus',mus?1:0); t(); const m=document.getElementById('bg-m'); if(!mus) m.pause(); else m.play(); }
+        function toggleM(){ mus=!mus; localStorage.setItem('mus',mus?1:0); t(); const m=document.getElementById('bg-m'); if(!mus) m.pause(); else { m.volume=0.1; m.play(); } }
         function toggleS(){ snd=!snd; localStorage.setItem('snd',snd?1:0); t(); }
         function chL(){ lng=lng==='RU'?'EN':'RU'; localStorage.setItem('lng',lng); t(); }
         up();
