@@ -3,27 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Beaver Clicker</title>
+    <title>Beaver World</title>
     <style>
-        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; overflow: hidden; }
-        #beaver { width: 200px; cursor: pointer; transition: transform 0.1s; margin-top: 50px; }
-        #beaver:active { transform: scale(0.9); }
-        .stats { font-size: 24px; margin-top: 20px; }
+        body { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            color: white; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; height: 100vh;
+        }
+        .tab-btn { padding: 12px 25px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; cursor: pointer; border-radius: 8px; margin: 5px; }
+        .active { background: #27ae60; box-shadow: 0 0 15px #27ae60; }
+        #game-section, #shop-section { display: none; padding: 20px; height: calc(100vh - 80px); overflow-y: auto; }
+        #beaver { width: 220px; margin-top: 50px; cursor: pointer; filter: drop-shadow(0 0 20px rgba(0,0,0,0.5)); transition: transform 0.05s; }
+        #beaver:active { transform: scale(0.95); }
+        .shop-item { background: rgba(0,0,0,0.3); margin: 8px 0; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
+        .buy-btn { background: #e67e22; border: none; color: white; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .buy-btn:disabled { background: #7f8c8d; }
     </style>
 </head>
 <body>
-    <div class="stats">Монеты: <span id="balance">0</span></div>
-    <img id="beaver" src="https://img.icons8.com/color/344/beaver.png" alt="Beaver">
-    <script>
-        let balance = parseInt(localStorage.getItem('clicks')) || 0;
-        const balanceEl = document.getElementById('balance');
-        balanceEl.innerText = balance;
+    <div style="padding-top: 15px;">
+        <button id="btn-game" class="tab-btn active" onclick="showTab('game')">🏠 ИГРА</button>
+        <button id="btn-shop" class="tab-btn" onclick="showTab('shop')">⚡ МАГАЗИН</button>
+    </div>
 
-        document.getElementById('beaver').onclick = () => {
-            balance += 1; // Базовая логика, улучшения считаются в боте
-            balanceEl.innerText = balance;
-            localStorage.setItem('clicks', balance);
+    <div id="game-section" style="display: block;">
+        <h1 style="font-size: 40px; margin-bottom: 5px;" id="balance">0</h1>
+        <p style="color: #bdc3c7;">за клик: +<span id="power-val">1</span></p>
+        <img id="beaver" src="https://img.icons8.com/color/344/beaver.png">
+    </div>
+
+    <div id="shop-section">
+        <h3>Улучшения бобра</h3>
+        <div id="shop-list"></div>
+    </div>
+
+    <script>
+        // Сохранение данных
+        let balance = parseInt(localStorage.getItem('beaver_clicks')) || 0;
+        let power = parseInt(localStorage.getItem('beaver_power')) || 1;
+        
+        const items = [
+            {n: "🎩 Шляпа", p: 10, b: 1}, {n: "👓 Очки", p: 100, b: 5},
+            {n: "👕 Худи", p: 500, b: 12}, {n: "👟 Кроссы", p: 1500, b: 30},
+            {n: "📱 Смартфон", p: 5000, b: 70}, {n: "💻 Ноутбук", p: 15000, b: 200},
+            {n: "🚗 Машина", p: 50000, b: 600}, {n: "🏠 Дом", p: 150000, b: 2000},
+            {n: "🚀 Ракета", p: 1000000, b: 15000}, {n: "👑 Корона", p: 5000000, b: 100000}
+        ];
+
+        function updateUI() {
+            document.getElementById('balance').innerText = Math.floor(balance).toLocaleString();
+            document.getElementById('power-val').innerText = power;
+            renderShop();
+        }
+
+        function showTab(tab) {
+            document.getElementById('game-section').style.display = tab === 'game' ? 'block' : 'none';
+            document.getElementById('shop-section').style.display = tab === 'shop' ? 'block' : 'none';
+            document.getElementById('btn-game').className = tab === 'game' ? 'tab-btn active' : 'tab-btn';
+            document.getElementById('btn-shop').className = tab === 'shop' ? 'tab-btn active' : 'tab-btn';
+        }
+
+        document.getElementById('beaver').onclick = (e) => {
+            balance += power;
+            updateUI();
+            localStorage.setItem('beaver_clicks', balance);
         };
+
+        function renderShop() {
+            const list = document.getElementById('shop-list');
+            list.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `<div><b>${item.n}</b><br><small>+${item.b} к клику</small></div>
+                    <button class="buy-btn" ${balance < item.p ? 'disabled' : ''} onclick="buy(${item.p}, ${item.b})">${item.p} 💰</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        function buy(price, boost) {
+            if (balance >= price) {
+                balance -= price;
+                power += boost;
+                localStorage.setItem('beaver_clicks', balance);
+                localStorage.setItem('beaver_power', power);
+                updateUI();
+            }
+        }
+        updateUI();
     </script>
 </body>
 </html>
