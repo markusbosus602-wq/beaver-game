@@ -5,42 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        #adm-btn { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
         
-        /* Статистика и Уровень */
-        .stats-top { margin-top: 30px; }
+        .stats-top { margin-top: 20px; }
         .stats { font-size: 38px; font-weight: bold; color: #f1c40f; }
-        .level-info { font-size: 18px; color: #ecf0f1; margin-top: 5px; }
+        .level-info { font-size: 16px; color: #ecf0f1; }
         
-        /* Бобер и предметы */
-        #game { width: 230px; height: 230px; margin: 20px auto; position: relative; }
+        #game { width: 250px; height: 250px; margin: 15px auto; position: relative; }
         #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
         .acc-layer { position: absolute; pointer-events: none; z-index: 2; display: none; }
-        #acc-hat { width: 50%; top: 5%; left: 25%; }
-        #acc-glass { width: 45%; top: 30%; left: 27.5%; }
+        #acc-hat { width: 45%; top: 6%; left: 27%; }
+        #acc-glass { width: 40%; top: 32%; left: 30%; }
 
         #beaver:active { transform: scale(0.95); }
         #beaver:active ~ .acc-layer { transform: scale(0.95); }
 
-        /* Навигация */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 8px; padding: 15px 0; border-top: 4px solid #e67e22; z-index: 50; }
-        .btn { padding: 10px 15px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #d35400; font-size: 13px; }
+        .btn { padding: 10px 15px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #d35400; }
 
-        /* Окна */
-        #shop, #settings, #wheel-p, #admin-p { display: none; background: rgba(0,0,0,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 20px; overflow-y: auto; }
-        .item { background: #34495e; margin: 8px; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #7f8c8d; }
-        .item img { width: 45px; height: 45px; background: #2c3e50; border-radius: 8px; }
+        .modal { display: none; background: rgba(20, 20, 20, 0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 40px; }
+        .close-corner { position: absolute; top: 15px; right: 15px; font-size: 24px; background: #c0392b; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
         
-        .wheel-container { position: relative; width: 240px; height: 240px; margin: 20px auto; }
-        #wheel-img { width: 100%; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); }
+        /* Стили для настроек звука */
+        .setting-row { margin: 20px; text-align: left; padding: 0 30px; }
+        .setting-row label { display: block; margin-bottom: 10px; font-weight: bold; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #e67e22; }
+
+        .item { background: #34495e; margin: 10px; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #7f8c8d; }
+        .item img { width: 50px; height: 50px; }
+        #list { overflow-y: auto; height: 80vh; }
     </style>
 </head>
 <body>
-    <div id="adm-btn"><button class="btn" style="background:#c0392b;" onclick="openP('admin-p')">⚙️</button></div>
-    
     <div class="stats-top">
         <div class="stats">💰 <span id="balance">0</span></div>
-        <div class="level-info">Уровень: <span id="lvl">1</span> (<span id="clicks">0</span> кликов)</div>
+        <div class="level-info">Уровень <span id="lvl">1</span> (<span id="clicks">0</span> кликов)</div>
     </div>
     
     <div id="game">
@@ -50,88 +48,89 @@
     </div>
 
     <div class="bottom-nav">
-        <button class="btn" onclick="openP('shop')">МАГАЗИН</button>
-        <button class="btn" style="background:#9b59b6" onclick="openP('wheel-p')">КОЛЕСО</button>
+        <button class="btn" onclick="openP('shop')">ШОП</button>
+        <button class="btn" style="background:#9b59b6" onclick="openP('wheel-p')">УДАЧА</button>
         <button class="btn" style="background:#7f8c8d" onclick="openP('settings')">⚙️</button>
     </div>
 
-    <div id="shop"><h3>МАГАЗИН (30 вещей)</h3><div id="list" style="padding-bottom:100px;"></div><button class="btn" onclick="closeP('shop')">ЗАКРЫТЬ</button></div>
+    <div id="shop" class="modal">
+        <button class="close-corner" onclick="closeP('shop')">×</button>
+        <h3>МАГАЗИН</h3>
+        <div id="list"></div>
+    </div>
     
-    <div id="wheel-p">
-        <h3>УДАЧА</h3>
-        <div class="wheel-container">
-            <img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png">
+    <div id="settings" class="modal">
+        <button class="close-corner" onclick="closeP('settings')">×</button>
+        <h3>НАСТРОЙКИ ЗВУКА</h3>
+        <div class="setting-row">
+            <label>Громкость музыки</label>
+            <input type="range" id="vol-m" min="0" max="1" step="0.1" value="0.5" oninput="setVol()">
         </div>
-        <button class="btn" onclick="spin()">КРУТИТЬ (50)</button><br><br>
-        <button class="btn" onclick="closeP('wheel-p')">ЗАКРЫТЬ</button>
+        <div class="setting-row">
+            <label>Громкость клика</label>
+            <input type="range" id="vol-s" min="0" max="1" step="0.1" value="0.8" oninput="setVol()">
+        </div>
+        <button class="btn" onclick="closeP('settings')">ГОТОВО</button>
     </div>
 
-    <div id="settings"><h3>⚙️ НАСТРОЙКИ</h3><button class="btn" onclick="toggleM()" id="m-btn">Музыка: ON</button><br><br><button class="btn" onclick="toggleS()" id="s-btn">Звуки: ON</button><br><br><button class="btn" onclick="closeP('settings')">ОК</button></div>
-    <div id="admin-p"><h3>АДМИН</h3><p>Команды: /give, /users</p><button class="btn" onclick="closeP('admin-p')">ЗАКРЫТЬ</button></div>
+    <div id="wheel-p" class="modal">
+        <button class="close-corner" onclick="closeP('wheel-p')">×</button>
+        <h3>КОЛЕСО</h3>
+        <button class="btn" onclick="spin()">КРУТИТЬ (50)</button>
+    </div>
 
     <audio id="snd-c" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
     <audio id="snd-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const tg = window.Telegram.WebApp; tg.expand();
-        if(tg.initDataUnsafe.user?.id === 5693452271) document.getElementById('adm-btn').style.display = 'block';
+        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, tc = parseInt(localStorage.getItem('tc')) || 0,
+            h_img = localStorage.getItem('hi')||"", g_img = localStorage.getItem('gi')||"";
 
-        let b = parseInt(localStorage.getItem('b')) || 0, 
-            p = parseInt(localStorage.getItem('p')) || 1,
-            tc = parseInt(localStorage.getItem('tc')) || 0,
-            mus = true, snd = true, h_img = localStorage.getItem('hi')||"", g_img = localStorage.getItem('gi')||"", isS = false;
-
-        // Генерация 30 предметов
-        const icons = ["baseball-cap", "glasses", "mustache", "bandana", "top-hat", "angel-halo", "pirate-hat", "knight-helmet", "crown", "monocle"];
-        const items = [];
-        for(let i=1; i<=30; i++) {
-            let type = i % 2 === 0 ? "glass" : "hat";
-            let icon = icons[(i-1) % icons.length];
-            items.push({ n: "Вещь #" + i, p: i * 50, pw: i * 3, t: type, i: `https://img.icons8.com/color/200/${icon}.png` });
-        }
+        const assets = [
+            {n:"Кепка", i:"baseball-cap", t:"hat"}, {n:"Очки", i:"glasses", t:"glass"}, {n:"Усы", i:"mustache", t:"glass"},
+            {n:"Бандана", i:"bandana", t:"hat"}, {n:"Цилиндр", i:"top-hat", t:"hat"}, {n:"Нимб", i:"angel-halo", t:"hat"},
+            {n:"Пират", i:"pirate-hat", t:"hat"}, {n:"Шлем", i:"knight-helmet", t:"hat"}, {n:"Корона", i:"crown", t:"hat"},
+            {n:"Монокль", i:"monocle", t:"glass"}, {n:"Маска", i:"protection-mask", t:"glass"}, {n:"Колпак", i:"party-hat", t:"hat"}
+        ]; // Добавь остальные до 30 по аналогии
 
         function up() {
             document.getElementById('balance').innerText = b.toLocaleString();
             document.getElementById('clicks').innerText = tc;
             document.getElementById('lvl').innerText = Math.floor(tc / 100) + 1;
-            if(h_img){ const e=document.getElementById('acc-hat'); e.src=h_img; e.style.display='block'; }
-            if(g_img){ const e=document.getElementById('acc-glass'); e.src=g_img; e.style.display='block'; }
+            if(h_img){ let e=document.getElementById('acc-hat'); e.src=h_img; e.style.display='block'; }
+            if(g_img){ let e=document.getElementById('acc-glass'); e.src=g_img; e.style.display='block'; }
             localStorage.setItem('b', b); localStorage.setItem('p', p); localStorage.setItem('tc', tc);
             localStorage.setItem('hi', h_img); localStorage.setItem('gi', g_img);
         }
 
+        function setVol() {
+            document.getElementById('snd-m').volume = document.getElementById('vol-m').value;
+            document.getElementById('snd-c').volume = document.getElementById('vol-s').value;
+        }
+
         document.getElementById('beaver').onclick = () => {
             b += p; tc++; 
-            if(snd){ let s=document.getElementById('snd-c'); s.currentTime=0; s.play(); }
-            if(mus){ let m=document.getElementById('snd-m'); if(m.paused) m.play(); } up();
+            let s=document.getElementById('snd-c'); s.currentTime=0; s.play();
+            let m=document.getElementById('snd-m'); if(m.paused) m.play();
+            up();
         };
-
-        function spin() {
-            if(isS || b < 50) return; isS = true; b -= 50; up();
-            let w = document.getElementById('wheel-img');
-            w.style.transform = `rotate(${1800 + Math.random() * 360}deg)`;
-            setTimeout(() => { b += Math.floor(Math.random()*1500); isS = false; w.style.transition='none'; w.style.transform='rotate(0deg)'; setTimeout(()=>w.style.transition='4s',50); up(); }, 4100);
-        }
 
         function openP(id) {
             document.getElementById(id).style.display='block';
             if(id==='shop') {
                 let l = document.getElementById('list'); l.innerHTML='';
-                items.forEach((it, i) => { l.innerHTML += `<div class="item"><img src="${it.i}"><b>${it.n}<br><small>+${it.pw}</small></b><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; });
+                assets.forEach((it, i) => { 
+                    let pr = (i + 1) * 40, pw = (i + 1) * 3, img = `https://img.icons8.com/color/100/${it.i}.png`;
+                    l.innerHTML += `<div class="item"><img src="${img}"><b>${it.n}</b><button class="btn" onclick="buy('${img}','${it.t}',${pr},${pw})">${pr}</button></div>`;
+                });
             }
         }
         function closeP(id){ document.getElementById(id).style.display='none'; }
-        function buy(i) {
-            if(b >= items[i].p) {
-                b -= items[i].p; p += items[i].pw;
-                if(items[i].t === "hat") h_img = items[i].i; else g_img = items[i].i;
-                up();
-            }
+        
+        function buy(img, type, price, power) {
+            if(b >= price) { b -= price; p += power; if(type === "hat") h_img = img; else g_img = img; up(); }
         }
-        function toggleM() { mus = !mus; let m = document.getElementById('snd-m'); if(!mus) m.pause(); else m.play(); }
-        function toggleS() { snd = !snd; }
-        up();
+        up(); setVol();
     </script>
 </body>
 </html>
