@@ -8,29 +8,31 @@
         #adm-btn { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
         .stats { font-size: 38px; margin-top: 40px; font-weight: bold; color: #f1c40f; }
         
-        /* БОБЕР И СЛОЙ ВЕЩЕЙ */
-        #game { width: 220px; height: 220px; margin: 20px auto; position: relative; }
-        #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
-        #acc { position: absolute; width: 50%; top: 8%; left: 25%; z-index: 2; pointer-events: none; display: none; }
-        #beaver:active { transform: scale(0.9); }
+        /* ЦЕНТР ГИБКОЙ ПОСАДКИ ПРЕДМЕТОВ */
+        #game { width: 250px; height: 250px; margin: 20px auto; position: relative; display: flex; align-items: center; justify-content: center; }
+        #beaver { width: 100%; cursor: pointer; transition: 0.1s; z-index: 1; }
+        .acc-layer { position: absolute; pointer-events: none; z-index: 2; display: none; transition: 0.1s; }
+        
+        /* Позиции для разных типов */
+        .type-hat { width: 50%; top: 5%; left: 25%; }
+        .type-glass { width: 45%; top: 28%; left: 27.5%; }
+        .type-neck { width: 40%; top: 55%; left: 30%; }
 
-        /* МЕНЮ СНИЗУ */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 4px solid #e67e22; }
+        #beaver:active { transform: scale(0.95); }
+        #beaver:active ~ .acc-layer { transform: scale(0.95); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 4px solid #e67e22; z-index: 50; }
         .btn { padding: 12px 18px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #d35400; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px #d35400; }
-
+        
         #shop, #settings, #wheel-p, #admin-p { display: none; background: rgba(0,0,0,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 20px; overflow-y: auto; }
         
         /* КОЛЕСО */
-        .wheel-box { position: relative; width: 240px; height: 240px; margin: 20px auto; }
-        #wheel-img { width: 100%; transition: 3s cubic-bezier(0.1, 0, 0.1, 1); }
+        .wheel-container { position: relative; width: 260px; height: 260px; margin: 20px auto; }
+        #wheel-img { width: 100%; transition: 4s cubic-bezier(0.15, 0, 0.15, 1); }
+        .wheel-arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; z-index: 10; }
 
-        /* МАГАЗИН */
         .item { background: #34495e; margin: 10px; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #7f8c8d; }
-        .item-left { display: flex; align-items: center; gap: 10px; text-align: left; }
-        .item img { width: 50px; height: 50px; background: #2c3e50; border-radius: 8px; padding: 2px; }
-        .item-info b { font-size: 16px; color: #ecf0f1; }
-        .item-info p { margin: 0; font-size: 12px; color: #bdc3c7; }
+        .item img { width: 50px; height: 50px; background: #2c3e50; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -39,7 +41,8 @@
     
     <div id="game">
         <img id="beaver" src="https://img.icons8.com/color/480/beaver.png">
-        <img id="acc" src="">
+        <img id="acc-hat" class="acc-layer type-hat" src="">
+        <img id="acc-glass" class="acc-layer type-glass" src="">
     </div>
 
     <div class="bottom-nav">
@@ -49,15 +52,16 @@
     </div>
 
     <div id="wheel-p">
-        <h3>КОЛЕСО УДАЧИ</h3>
-        <div class="wheel-box">
+        <h3>УДАЧА</h3>
+        <div class="wheel-container">
+            <img class="wheel-arrow" src="https://cdn-icons-png.flaticon.com/512/8214/8214534.png">
             <img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png">
         </div>
-        <button class="btn" onclick="spin()">КРУТИТЬ (100 💰)</button><br><br>
+        <button class="btn" id="spin-go" onclick="spin()">КРУТИТЬ (100 💰)</button><br><br>
         <button class="btn" onclick="closeP('wheel-p')">ЗАКРЫТЬ</button>
     </div>
 
-    <div id="shop"><h3>МАГАЗИН</h3><div id="list"></div><button class="btn" onclick="closeP('shop')">ЗАКРЫТЬ</button></div>
+    <div id="shop"><h3>МАГАЗИН</h3><div id="list" style="padding-bottom:100px;"></div><button class="btn" onclick="closeP('shop')">ЗАКРЫТЬ</button></div>
     
     <div id="settings">
         <h3>НАСТРОЙКИ</h3>
@@ -65,8 +69,6 @@
         <button class="btn" onclick="toggleS()" id="s-btn">Звуки: ON</button><br><br>
         <button class="btn" onclick="closeP('settings')">ОК</button>
     </div>
-
-    <div id="admin-p"><h3>АДМИНКА</h3><p>Команды в чате бота</p><button class="btn" onclick="closeP('admin-p')">ЗАКРЫТЬ</button></div>
 
     <audio id="snd-c" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
     <audio id="snd-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
@@ -77,21 +79,25 @@
         if(tg.initDataUnsafe.user?.id === 5693452271 || tg.initDataUnsafe.user?.username === "Kuiakanda") document.getElementById('adm-btn').style.display = 'block';
 
         let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, 
-            mus = true, snd = true, img = localStorage.getItem('i') || "", isS = false;
+            mus = true, snd = true, h_img = localStorage.getItem('hi')||"", g_img = localStorage.getItem('gi')||"", isS = false;
 
         const items = [
-            {n:"Кепка", p:40, pw:2, i:"https://img.icons8.com/color/200/baseball-cap.png"},
-            {n:"Очки", p:120, pw:5, i:"https://img.icons8.com/color/200/glasses.png"},
-            {n:"Усы", p:250, pw:10, i:"https://img.icons8.com/color/200/mustache.png"},
-            {n:"Шляпа", p:500, pw:20, i:"https://img.icons8.com/color/200/top-hat.png"},
-            {n:"Корона", p:1500, pw:100, i:"https://img.icons8.com/color/200/crown.png"}
+            {n:"Кепка", p:30, pw:2, t:"hat", i:"https://img.icons8.com/color/200/baseball-cap.png"},
+            {n:"Очки", p:80, pw:4, t:"glass", i:"https://img.icons8.com/color/200/glasses.png"},
+            {n:"Усы", p:150, pw:8, t:"glass", i:"https://img.icons8.com/color/200/mustache.png"},
+            {n:"Шляпа", p:300, pw:15, t:"hat", i:"https://img.icons8.com/color/200/top-hat.png"},
+            {n:"Нимб", p:500, pw:25, t:"hat", i:"https://img.icons8.com/color/200/angel-halo.png"},
+            {n:"Маска", p:800, pw:40, t:"glass", i:"https://img.icons8.com/color/200/protection-mask.png"},
+            {n:"Шлем", p:1200, pw:60, t:"hat", i:"https://img.icons8.com/color/200/knight-helmet.png"},
+            {n:"Корона", p:2500, pw:120, t:"hat", i:"https://img.icons8.com/color/200/crown.png"}
         ];
 
         function up() {
             document.getElementById('balance').innerText = b.toLocaleString();
-            const a = document.getElementById('acc');
-            if(img){ a.src=img; a.style.display='block'; }
-            localStorage.setItem('b', b); localStorage.setItem('p', p); localStorage.setItem('i', img);
+            if(h_img){ const e=document.getElementById('acc-hat'); e.src=h_img; e.style.display='block'; }
+            if(g_img){ const e=document.getElementById('acc-glass'); e.src=g_img; e.style.display='block'; }
+            localStorage.setItem('b', b); localStorage.setItem('p', p);
+            localStorage.setItem('hi', h_img); localStorage.setItem('gi', g_img);
         }
 
         document.getElementById('beaver').onclick = () => {
@@ -102,8 +108,14 @@
         function spin() {
             if(isS || b < 100) return; isS = true; b -= 100; up();
             let w = document.getElementById('wheel-img');
-            w.style.transform = `rotate(${1800 + Math.random() * 360}deg)`;
-            setTimeout(() => { b += Math.floor(Math.random()*1500); w.style.transform='rotate(0deg)'; isS=false; up(); }, 3000);
+            let rotation = 1800 + Math.random() * 360;
+            w.style.transform = `rotate(${rotation}deg)`;
+            setTimeout(() => { 
+                b += Math.floor(Math.random()*2000); 
+                isS = false; w.style.transition = 'none'; w.style.transform = 'rotate(0deg)';
+                setTimeout(()=> w.style.transition = '4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
+                up(); 
+            }, 4100);
         }
 
         function openP(id) {
@@ -111,12 +123,19 @@
             if(id==='shop') {
                 let l = document.getElementById('list'); l.innerHTML='';
                 items.forEach((it, i) => { 
-                    l.innerHTML += `<div class="item"><div class="item-left"><img src="${it.i}"><div class="item-info"><b>${it.n}</b><p>+${it.pw} за клик</p></div></div><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; 
+                    l.innerHTML += `<div class="item"><div><img src="${it.i}"><br><b>${it.n}</b></div><button class="btn" onclick="buy(${i})">${it.p} 💰</button></div>`; 
                 });
             }
         }
         function closeP(id){ document.getElementById(id).style.display='none'; }
-        function buy(i) { if(b >= items[i].p) { b -= items[i].p; p += items[i].pw; img = items[i].i; up(); closeP('shop'); } }
+        function buy(i) {
+            if(b >= items[i].p) {
+                b -= items[i].p; p += items[i].pw;
+                if(items[i].t === "hat") h_img = items[i].i;
+                else g_img = items[i].i;
+                up();
+            }
+        }
         function toggleM() { mus = !mus; let m = document.getElementById('snd-m'); if(!mus) m.pause(); else m.play(); }
         function toggleS() { snd = !snd; }
         up();
