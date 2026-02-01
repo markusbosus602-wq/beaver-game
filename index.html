@@ -4,109 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        .stats-top { margin-top: 20px; }
-        .stats { font-size: 40px; font-weight: bold; color: #f1c40f; }
-        #game { width: 250px; height: 250px; margin: 20px auto; position: relative; }
+        body { background: #1a252f; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        .header { padding: 10px; background: #2c3e50; border-bottom: 3px solid #e67e22; }
+        .stats { font-size: 32px; font-weight: bold; color: #f1c40f; }
+        .lvl-info { font-size: 14px; color: #bdc3c7; }
+        #game { width: 260px; height: 260px; margin: 20px auto; position: relative; }
         #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
-        .acc-layer { position: absolute; pointer-events: none; z-index: 2; display: none; }
-        #acc-hat { width: 48%; top: 5%; left: 26%; }
-        #acc-glass { width: 42%; top: 31%; left: 29%; }
+        .acc { position: absolute; pointer-events: none; display: none; z-index: 5; transition: 0.1s; }
+        #acc-h { width: 50%; top: -5%; left: 25%; } /* Шапки */
+        #acc-f { width: 45%; top: 32%; left: 28%; } /* Лицо (усы/очки) */
         #beaver:active { transform: scale(0.95); }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 4px solid #e67e22; }
-        .btn { padding: 10px 20px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .modal { display: none; background: rgba(0,0,0,0.95); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 40px; }
-        .close { position: absolute; top: 10px; right: 10px; background: #c0392b; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; }
-        #list { overflow-y: auto; height: 85vh; }
-        .item { background: #2c3e50; margin: 10px; padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .item img { width: 50px; }
-        .wheel-box { width: 200px; height: 200px; margin: 20px auto; position: relative; }
-        #wheel-img { width: 100%; transition: 4s cubic-bezier(0.1, 0, 0.1, 1); }
+        #beaver:active ~ .acc { transform: scale(0.95); }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #2c3e50; display: flex; justify-content: space-around; padding: 15px 0; border-top: 4px solid #e67e22; }
+        .btn { padding: 10px 20px; background: #e67e22; border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .modal { display: none; background: #1a252f; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; overflow-y: auto; }
+        .item { background: #34495e; margin: 10px; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; }
+        .item img { width: 50px; height: 50px; border-radius: 5px; }
+        .close { position: fixed; top: 10px; right: 10px; background: #c0392b; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; z-index: 101; }
     </style>
 </head>
 <body>
-    <div class="stats-top">
-        <div class="stats">💰 <span id="balance">0</span></div>
-        <div>Уровень: <span id="lvl">1</span> | Клики: <span id="tc">0</span></div>
+    <div class="header">
+        <div class="stats">💰 <span id="bal">0</span></div>
+        <div class="lvl-info">Уровень: <span id="lvl">1</span> | Клик: +<span id="pwr">1</span></div>
     </div>
+
     <div id="game">
         <img id="beaver" src="https://img.icons8.com/color/480/beaver.png">
-        <img id="acc-hat" class="acc-layer">
-        <img id="acc-glass" class="acc-layer">
+        <img id="acc-h" class="acc">
+        <img id="acc-f" class="acc">
     </div>
+
     <div class="bottom-nav">
-        <button class="btn" onclick="openP('shop')">ШОП</button>
-        <button class="btn" onclick="openP('wheel')">УДАЧА</button>
-        <button class="btn" onclick="openP('settings')">⚙️</button>
+        <button class="btn" onclick="openM('shop')">МАГАЗИН</button>
+        <button class="btn" onclick="reset()">СБРОС</button>
     </div>
+
     <div id="shop" class="modal">
-        <button class="close" onclick="closeP('shop')">×</button>
-        <div id="list"></div>
+        <button class="close" onclick="closeM('shop')">×</button>
+        <div id="list" style="padding-top: 50px;"></div>
     </div>
-    <div id="wheel" class="modal">
-        <button class="close" onclick="closeP('wheel')">×</button>
-        <div class="wheel-box"><img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png"></div>
-        <button class="btn" onclick="spin()">КРУТИТЬ (100)</button>
-    </div>
-    <div id="settings" class="modal">
-        <button class="close" onclick="closeP('settings')">×</button>
-        <div style="padding: 20px;">
-            Музыка: <input type="range" id="vol-m" min="0" max="1" step="0.1" oninput="setV()"><br><br>
-            Звук: <input type="range" id="vol-s" min="0" max="1" step="0.1" oninput="setV()">
-        </div>
-    </div>
-    <audio id="s-c" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
-    <audio id="s-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
+
+    <audio id="snd" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
+
     <script>
-        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, tc = parseInt(localStorage.getItem('tc')) || 0,
-            hi = localStorage.getItem('hi') || "", gi = localStorage.getItem('gi') || "", sp = false;
-        const items = [
-            {n:"Кепка", i:"baseball-cap", t:"hat"}, {n:"Очки", i:"glasses", t:"glass"}, {n:"Усы", i:"mustache", t:"glass"},
-            {n:"Бандана", i:"bandana", t:"hat"}, {n:"Цилиндр", i:"top-hat", t:"hat"}, {n:"Нимб", i:"angel-halo", t:"hat"},
-            {n:"Пират", i:"pirate-hat", t:"hat"}, {n:"Шлем", i:"knight-helmet", t:"hat"}, {n:"Корона", i:"crown", t:"hat"},
-            {n:"Монокль", i:"monocle", t:"glass"}, {n:"Маска", i:"protection-mask", t:"glass"}, {n:"Колпак", i:"party-hat", t:"hat"},
-            {n:"Наушники", i:"headphones", t:"hat"}, {n:"Викинг", i:"viking-helmet", t:"hat"}, {n:"Шериф", i:"sheriff-hat", t:"hat"},
-            {n:"Клоун", i:"clown-hat", t:"hat"}, {n:"Кот", i:"cat-ears", t:"hat"}, {n:"Звезда", i:"star", t:"hat"},
-            {n:"Гриб", i:"mushroom", t:"hat"}, {n:"Тюрбан", i:"turban", t:"hat"}, {n:"Рога", i:"devil-horns", t:"hat"},
-            {n:"Зорро", i:"eyepatch", t:"glass"}, {n:"Повар", i:"chef-hat", t:"hat"}, {n:"Пилот", i:"pilot-hat", t:"hat"},
-            {n:"Сварщик", i:"welding-helmet", t:"hat"}, {n:"Сомбреро", i:"sombrero", t:"hat"}, {n:"Олень", i:"reindeer-antlers", t:"hat"},
-            {n:"Зубы", i:"vampire-teeth", t:"glass"}, {n:"Кролик", i:"rabbit-ears", t:"hat"}, {n:"Маг", i:"witch-hat", t:"hat"}
+        let b = parseInt(localStorage.getItem('b')) || 0;
+        let p = parseInt(localStorage.getItem('p')) || 1;
+        let h = localStorage.getItem('h') || "";
+        let f = localStorage.getItem('f') || "";
+
+        const assets = [
+            {n:"Кепка", i:"baseball-cap", t:"h"}, {n:"Очки", i:"glasses", t:"f"},
+            {n:"Усы", i:"mustache", t:"f"}, {n:"Шлем", i:"knight-helmet", t:"h"},
+            {n:"Корона", i:"crown", t:"h"}, {n:"Маска", i:"protection-mask", t:"f"}
         ];
+
         function up() {
-            document.getElementById('balance').innerText = b.toLocaleString();
-            document.getElementById('tc').innerText = tc;
-            document.getElementById('lvl').innerText = Math.floor(tc/100)+1;
-            if(hi){let e=document.getElementById('acc-hat'); e.src=hi; e.style.display='block';}
-            if(gi){let e=document.getElementById('acc-glass'); e.src=gi; e.style.display='block';}
-            localStorage.setItem('b',b); localStorage.setItem('p',p); localStorage.setItem('tc',tc);
-            localStorage.setItem('hi',hi); localStorage.setItem('gi',gi);
+            document.getElementById('bal').innerText = b.toLocaleString();
+            document.getElementById('pwr').innerText = p;
+            
+            // Расчет уровня
+            let level = 1;
+            if (b >= 100000000) level = 4;
+            else if (b >= 10000000) level = 3;
+            else if (b >= 1000000) level = 2;
+            document.getElementById('lvl').innerText = level;
+
+            const elH = document.getElementById('acc-h');
+            if(h) { elH.src = h; elH.style.display = 'block'; }
+            const elF = document.getElementById('acc-f');
+            if(f) { elF.src = f; elF.style.display = 'block'; }
+
+            localStorage.setItem('b', b); localStorage.setItem('p', p);
+            localStorage.setItem('h', h); localStorage.setItem('f', f);
         }
-        function setV() { document.getElementById('s-m').volume = document.getElementById('vol-m').value; document.getElementById('s-c').volume = document.getElementById('vol-s').value; }
+
         document.getElementById('beaver').onclick = () => {
-            b += p; tc++; document.getElementById('s-c').currentTime=0; document.getElementById('s-c').play();
-            if(document.getElementById('s-m').paused) document.getElementById('s-m').play(); up();
+            b += p; up();
+            let s = document.getElementById('snd'); s.currentTime = 0; s.play();
         };
-        function openP(id) {
-            document.getElementById(id).style.display='block';
-            if(id==='shop'){
-                let l=document.getElementById('list'); l.innerHTML='';
-                items.forEach((it,i)=>{
-                    let pr=(i+1)*50, pw=(i+1)*2, u=`https://img.icons8.com/color/100/${it.i}.png`;
-                    l.innerHTML+=`<div class="item"><img src="${u}"><b>${it.n} (+${pw})</b><button class="btn" onclick="buy('${u}','${it.t}',${pr},${pw})">${pr}</button></div>`;
-                });
+
+        function openM(id) {
+            document.getElementById(id).style.display = 'block';
+            let l = document.getElementById('list'); l.innerHTML = '';
+            for(let i=1; i<=1000; i++) {
+                let pr = i * 1000;
+                if (pr > 100000000) break;
+                let a = assets[i % assets.length];
+                let img = `https://img.icons8.com/color/150/${a.i}.png`;
+                l.innerHTML += `
+                <div class="item">
+                    <img src="${img}">
+                    <div style="flex:1; margin-left:10px; text-align:left">
+                        <b>${a.n} v.${i}</b><br><small>+${i*2} к клику</small>
+                    </div>
+                    <button class="btn" onclick="buy('${img}','${a.t}',${pr},${i*2})">${(pr >= 1000000 ? pr/1000000+'М' : pr/1000+'К')}</button>
+                </div>`;
             }
         }
-        function closeP(id){document.getElementById(id).style.display='none';}
-        function buy(u,t,pr,pw){if(b>=pr){b-=pr; p+=pw; if(t==='hat')hi=u; else gi=u; up();}}
-        function spin() {
-            if(sp || b<100) return; sp=true; b-=100; up();
-            let w=document.getElementById('wheel-img'), d=1800+Math.random()*360;
-            w.style.transform=`rotate(${d}deg)`;
-            setTimeout(()=>{ b+=Math.floor(Math.random()*2000); w.style.transition='none'; w.style.transform='rotate(0deg)'; setTimeout(()=>{w.style.transition='4s'; sp=false; up();},50);},4100);
+
+        function closeM(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function buy(url, type, price, power) {
+            if(b >= price) {
+                b -= price; p += power;
+                if(type === 'h') h = url; else f = url;
+                up();
+            } else alert("Нужно больше монет!");
         }
+
+        function reset() { if(confirm("Сбросить игру?")) { localStorage.clear(); location.reload(); } }
         up();
     </script>
 </body>
-</html> 
-
-
+</html>
