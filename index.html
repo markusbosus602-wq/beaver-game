@@ -3,70 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Beaver Clicker</title>
     <style>
-        body { background: #2c3e50; color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        
-        /* Верхняя панель */
+        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         .stats-top { margin-top: 20px; }
-        .stats { font-size: 42px; font-weight: bold; color: #f1c40f; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .level-info { font-size: 16px; color: #bdc3c7; margin-top: 5px; }
-
-        /* Игровая зона и Бобер */
-        #game { width: 260px; height: 260px; margin: 20px auto; position: relative; }
+        .stats { font-size: 40px; font-weight: bold; color: #f1c40f; }
+        #game { width: 250px; height: 250px; margin: 20px auto; position: relative; }
         #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
         .acc-layer { position: absolute; pointer-events: none; z-index: 2; display: none; }
-        
-        /* Координаты вещей (чтобы не были просто наложены) */
         #acc-hat { width: 48%; top: 5%; left: 26%; }
         #acc-glass { width: 42%; top: 31%; left: 29%; }
-
-        #beaver:active { transform: scale(0.92); }
-        #beaver:active ~ .acc-layer { transform: scale(0.92); }
-
-        /* Нижнее меню */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 4px solid #e67e22; z-index: 100; }
-        .btn { padding: 12px 20px; background: #e67e22; border: none; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #d35400; transition: 0.2s; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px #d35400; }
-
-        /* Модальные окна */
-        .modal { display: none; background: rgba(15, 15, 15, 0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 50px; }
-        .close-btn { position: absolute; top: 15px; right: 15px; background: #c0392b; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; font-weight: bold; }
-        
-        /* Список магазина */
-        #list { overflow-y: auto; height: 80vh; padding: 10px; }
-        .item { background: #2c3e50; margin-bottom: 10px; padding: 12px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
-        .item img { width: 50px; height: 50px; border-radius: 8px; }
-        .item-info { text-align: left; flex-grow: 1; margin-left: 15px; }
-
-        /* Настройки звука */
-        .setting-row { margin: 25px; text-align: left; padding: 0 20px; }
-        input[type=range] { width: 100%; accent-color: #e67e22; height: 10px; cursor: pointer; }
-
-        /* Колесо */
-        .wheel-box { position: relative; width: 250px; height: 250px; margin: 30px auto; }
+        #beaver:active { transform: scale(0.95); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 4px solid #e67e22; }
+        .btn { padding: 10px 20px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .modal { display: none; background: rgba(0,0,0,0.95); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 40px; }
+        .close { position: absolute; top: 10px; right: 10px; background: #c0392b; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; }
+        #list { overflow-y: auto; height: 85vh; }
+        .item { background: #2c3e50; margin: 10px; padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .item img { width: 50px; }
+        .wheel-box { width: 200px; height: 200px; margin: 20px auto; position: relative; }
         #wheel-img { width: 100%; transition: 4s cubic-bezier(0.1, 0, 0.1, 1); }
-        .arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 35px; z-index: 10; }
     </style>
 </head>
 <body>
-
     <div class="stats-top">
         <div class="stats">💰 <span id="balance">0</span></div>
-        <div class="level-info">LVL <span id="lvl">1</span> | КЛИКИ: <span id="tc">0</span></div>
+        <div>Уровень: <span id="lvl">1</span> | Клики: <span id="tc">0</span></div>
     </div>
-    
     <div id="game">
         <img id="beaver" src="https://img.icons8.com/color/480/beaver.png">
-        <img id="acc-hat" class="acc-layer" src="">
-        <img id="acc-glass" class="acc-layer" src="">
+        <img id="acc-hat" class="acc-layer">
+        <img id="acc-glass" class="acc-layer">
     </div>
-
     <div class="bottom-nav">
         <button class="btn" onclick="openP('shop')">ШОП</button>
-        <button class="btn" style="background:#9b59b6" onclick="openP('wheel')">УДАЧА</button>
-        <button class="btn" style="background:#7f8c8d" onclick="openP('settings')">⚙️</button>
+        <button class="btn" onclick="openP('wheel')">УДАЧА</button>
+        <button class="btn" onclick="openP('settings')">⚙️</button>
     </div>
-
     <div id="shop" class="modal">
-        <button class="close-btn" onclick="closeP('
+        <button class="close" onclick="closeP('shop')">×</button>
+        <div id="list"></div>
+    </div>
+    <div id="wheel" class="modal">
+        <button class="close" onclick="closeP('wheel')">×</button>
+        <div class="wheel-box"><img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png"></div>
+        <button class="btn" onclick="spin()">КРУТИТЬ (100)</button>
+    </div>
+    <div id="settings" class="modal">
+        <button class="close" onclick="closeP('settings')">×</button>
+        <div style="padding: 20px;">
+            Музыка: <input type="range" id="vol-m" min="0" max="1" step="0.1" oninput="setV()"><br><br>
+            Звук: <input type="range" id="vol-s" min="0" max="1" step="0.1" oninput="setV()">
+        </div>
+    </div>
+    <audio id="s-c" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
+    <audio id="s-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
+    <script>
+        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, tc = parseInt(localStorage.getItem('tc')) || 0,
+            hi = localStorage.getItem('hi') || "", gi = localStorage.getItem('gi') || "", sp = false;
+        const items = [
+            {n:"Кепка", i:"baseball-cap", t:"hat"}, {n:"Очки", i:"glasses", t:"glass"}, {n:"Усы", i:"mustache", t:"glass"},
+            {n:"Бандана", i:"bandana", t:"hat"}, {n:"Цилиндр", i:"top-hat", t:"hat"}, {n:"Нимб", i:"angel-halo", t:"hat"},
+            {n:"Пират", i:"pirate-hat", t:"hat"}, {n:"Шлем", i:"knight-helmet", t:"hat"}, {n:"Корона", i:"crown", t:"hat"},
+            {n:"Монокль", i:"monocle", t:"glass"}, {n:"Маска", i:"protection-mask", t:"glass"}, {n:"Колпак", i:"party-hat", t:"hat"},
+            {n:"Наушники", i:"headphones", t:"hat"}, {n:"Викинг", i:"viking-helmet", t:"hat"}, {n:"Шериф", i:"sheriff-hat", t:"hat"},
+            {n:"Клоун", i:"clown-hat", t:"hat"}, {n:"Кот", i:"cat-ears", t:"hat"}, {n:"Звезда", i:"star", t:"hat"},
+            {n:"Гриб", i:"mushroom", t:"hat"}, {n:"Тюрбан", i:"turban", t:"hat"}, {n:"Рога", i:"devil-horns", t:"hat"},
+            {n:"Зорро", i:"eyepatch", t:"glass"}, {n:"Повар", i:"chef-hat", t:"hat"}, {n:"Пилот", i:"pilot-hat", t:"hat"},
+            {n:"Сварщик", i:"welding-helmet", t:"hat"}, {n:"Сомбреро", i:"sombrero", t:"hat"}, {n:"Олень", i:"reindeer-antlers", t:"hat"},
+            {n:"Зубы", i:"vampire-teeth", t:"glass"}, {n:"Кролик", i:"rabbit-ears", t:"hat"}, {n:"Маг", i:"witch-hat", t:"hat"}
+        ];
+        function up() {
+            document.getElementById('balance').innerText = b.toLocaleString();
+            document.getElementById('tc').innerText = tc;
+            document.getElementById('lvl').innerText = Math.floor(tc/100)+1;
+            if(hi){let e=document.getElementById('acc-hat'); e.src=hi; e.style.display='block';}
+            if(gi){let e=document.getElementById('acc-glass'); e.src=gi; e.style.display='block';}
+            localStorage.setItem('b',b); localStorage.setItem('p',p); localStorage.setItem('tc',tc);
+            localStorage.setItem('hi',hi); localStorage.setItem('gi',gi);
+        }
+        function setV() { document.getElementById('s-m').volume = document.getElementById('vol-m').value; document.getElementById('s-c').volume = document.getElementById('vol-s').value; }
+        document.getElementById('beaver').onclick = () => {
+            b += p; tc++; document.getElementById('s-c').currentTime=0; document.getElementById('s-c').play();
+            if(document.getElementById('s-m').paused) document.getElementById('s-m').play(); up();
+        };
+        function openP(id) {
+            document.getElementById(id).style.display='block';
+            if(id==='shop'){
+                let l=document.getElementById('list'); l.innerHTML='';
+                items.forEach((it,i)=>{
+                    let pr=(i+1)*50, pw=(i+1)*2, u=`https://img.icons8.com/color/100/${it.i}.png`;
+                    l.innerHTML+=`<div class="item"><img src="${u}"><b>${it.n} (+${pw})</b><button class="btn" onclick="buy('${u}','${it.t}',${pr},${pw})">${pr}</button></div>`;
+                });
+            }
+        }
+        function closeP(id){document.getElementById(id).style.display='none';}
+        function buy(u,t,pr,pw){if(b>=pr){b-=pr; p+=pw; if(t==='hat')hi=u; else gi=u; up();}}
+        function spin() {
+            if(sp || b<100) return; sp=true; b-=100; up();
+            let w=document.getElementById('wheel-img'), d=1800+Math.random()*360;
+            w.style.transform=`rotate(${d}deg)`;
+            setTimeout(()=>{ b+=Math.floor(Math.random()*2000); w.style.transition='none'; w.style.transform='rotate(0deg)'; setTimeout(()=>{w.style.transition='4s'; sp=false; up();},50);},4100);
+        }
+        up();
+    </script>
+</body>
+</html>
