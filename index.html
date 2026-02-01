@@ -3,130 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Beaver Ultimate</title>
+    <title>Beaver Online</title>
     <style>
-        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow-x: hidden; }
-        .stats { font-size: 28px; margin: 20px; font-weight: bold; }
-        #game { position: relative; width: 200px; height: 200px; margin: 30px auto; }
+        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* Админка в верхнем правом углу */
+        #admin-top { position: fixed; top: 15px; right: 15px; z-index: 100; }
+        
+        .stats { font-size: 32px; margin-top: 50px; font-weight: bold; color: #f1c40f; }
+        
+        #game { position: relative; width: 220px; height: 220px; margin: 60px auto; }
         #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
-        #acc { position: absolute; width: 65%; top: 5%; left: 17.5%; z-index: 2; pointer-events: none; }
-        #beaver:active { transform: scale(0.9); }
-        .btns { display: flex; justify-content: center; gap: 8px; margin-top: 20px; flex-wrap: wrap; padding: 0 10px; }
-        .btn { padding: 10px 15px; background: #e67e22; border: none; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        #shop, #settings, #wheel-p { display: none; background: rgba(0,0,0,0.96); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; padding-top: 20px; overflow-y: auto; }
-        .item { background: #34495e; margin: 8px auto; padding: 12px; width: 90%; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .item img { width: 40px; height: 40px; margin-right: 10px; }
-        .item-info { display: flex; align-items: center; text-align: left; }
-        #wheel-img { width: 220px; transition: transform 3s cubic-bezier(0.1, 0, 0.1, 1); margin: 20px 0; }
+        #acc { position: absolute; width: 60%; top: 5%; left: 20%; z-index: 2; pointer-events: none; }
+        #beaver:active { transform: scale(0.95); }
+
+        /* Нижнее меню */
+        .bottom-menu { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: space-around; padding: 15px 0; border-top: 3px solid #e67e22; }
+        
+        .btn { padding: 10px 15px; background: #e67e22; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-adm { background: #c0392b; font-size: 12px; padding: 8px 12px; }
+
+        #shop, #settings, #wheel-p, #admin-p { display: none; background: rgba(0,0,0,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 20px; overflow-y: auto; }
+        .item { background: #2c3e50; margin: 8px auto; padding: 12px; width: 90%; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #7f8c8d; }
     </style>
 </head>
 <body>
+
+    <div id="admin-top">
+        <button class="btn btn-adm" onclick="openP('admin-p')">⚙️ ADM</button>
+    </div>
+
     <div class="stats">💰 <span id="balance">0</span></div>
+
     <div id="game">
         <img id="beaver" src="https://cdn-icons-png.flaticon.com/512/3069/3069172.png">
         <img id="acc" src="" style="display:none;">
     </div>
-    <div class="btns">
-        <button class="btn" onclick="openP('shop')" id="btn-shop">МАГАЗИН</button>
-        <button class="btn" onclick="openP('wheel-p')" id="btn-wheel" style="background:#9b59b6">🎡 КОЛЕСО</button>
-        <button class="btn" onclick="openP('settings')">⚙️</button>
+
+    <div class="bottom-menu">
+        <button class="btn" onclick="openP('shop')">МАГАЗИН</button>
+        <button class="btn" style="background:#9b59b6" onclick="openP('wheel-p')">КОЛЕСО</button>
+        <button class="btn" style="background:#7f8c8d" onclick="openP('settings')">НАСТРОЙКИ</button>
     </div>
 
-    <div id="shop">
-        <h3 id="h-shop">МАГАЗИН</h3>
-        <div id="list"></div>
-        <button class="btn" style="background:#c0392b; margin: 20px 0;" onclick="closeP('shop')" id="btn-close-s">ЗАКРЫТЬ</button>
+    <div id="shop"><h3>МАГАЗИН (30)</h3><div id="list"></div><button class="btn" onclick="closeP('shop')">ЗАКРЫТЬ</button></div>
+    <div id="wheel-p"><h3>КОЛЕСО</h3><img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png" style="width:200px; transition:3s;"><br><button class="btn" onclick="spin()">КРУТИТЬ (1000)</button><br><br><button class="btn" onclick="closeP('wheel-p')">ЗАКРЫТЬ</button></div>
+    <div id="settings"><h3>НАСТРОЙКИ</h3><button class="btn" onclick="toggleL()" id="l-btn">Язык: RU</button><br><br><button class="btn" onclick="closeP('settings')">OK</button></div>
+    
+    <div id="admin-p">
+        <h3>АДМИН-ПАНЕЛЬ</h3>
+        <p>Команды вводить в чате бота:</p>
+        <div style="text-align:left; padding:20px; font-size:14px;">
+            /users — Список игроков<br>
+            /give @user сумма — Выдать<br>
+            /take @user сумма — Забрать<br>
+            /setmod @user — Модератор
+        </div>
+        <button class="btn" onclick="closeP('admin-p')">ЗАКРЫТЬ</button>
     </div>
-
-    <div id="wheel-p">
-        <h3 id="h-wheel">КОЛЕСО УДАЧИ</h3>
-        <p id="p-price">Цена: 1,000 💰</p>
-        <img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png"><br>
-        <button class="btn" onclick="spin()" id="spin-btn">КРУТИТЬ</button><br><br>
-        <button class="btn" style="background:#c0392b" onclick="closeP('wheel-p')" id="btn-close-w">ЗАКРЫТЬ</button>
-    </div>
-
-    <div id="settings">
-        <h3 id="h-set">НАСТРОЙКИ</h3>
-        <button class="btn" onclick="toggleM()" id="m-btn">Музыка: ВКЛ</button><br><br>
-        <button class="btn" onclick="toggleS()" id="s-btn">Звуки: ВКЛ</button><br><br>
-        <button class="btn" onclick="toggleL()" id="l-btn">Язык: RU</button><br><br>
-        <button class="btn" onclick="closeP('settings')">OK</button>
-    </div>
-
-    <audio id="hru" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
-    <audio id="bgm" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
 
     <script>
-        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1,
-            snd = localStorage.getItem('s') !== '0', mus = localStorage.getItem('m') !== '0',
-            lng = localStorage.getItem('l') || 'RU', img = localStorage.getItem('i') || "", isSpinning = false;
+        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, 
+            lng = localStorage.getItem('l') || 'RU', img = localStorage.getItem('i') || "";
 
         const items = [];
-        const icons = ["1865328", "655781", "1864474", "7322304", "2613143", "1211425", "942751", "1065524", "182337", "1404945"];
-        for(let i=1; i<=30; i++) {
-            let iconId = icons[(i-1) % icons.length];
-            items.push({
-                n: {RU: "Предмет "+i, EN: "Item "+i},
-                p: i * i * 150,
-                pw: i * 10,
-                i: `https://cdn-icons-png.flaticon.com/512/${iconId}/${iconId}.png`
-            });
-        }
-
-        const langData = {
-            RU: {shop:"МАГАЗИН", wheel:"🎡 КОЛЕСО", h_shop:"МАГАЗИН", h_wheel:"КОЛЕСО УДАЧИ", h_set:"НАСТРОЙКИ", price:"Цена: 1,000 💰", spin:"КРУТИТЬ", close:"ЗАКРЫТЬ", win:"Выигрыш: "},
-            EN: {shop:"SHOP", wheel:"🎡 WHEEL", h_shop:"SHOP", h_wheel:"LUCKY WHEEL", h_set:"SETTINGS", price:"Price: 1,000 💰", spin:"SPIN", close:"CLOSE", win:"You won: "}
-        };
+        for(let i=1; i<=30; i++) items.push({n:{RU:"Вещь "+i, EN:"Item "+i}, p:i*i*250, pw:i*15, i:"https://cdn-icons-png.flaticon.com/512/1865/1865328.png"});
 
         function up() {
             document.getElementById('balance').innerText = b.toLocaleString();
             const a = document.getElementById('acc');
             if(img){ a.src=img; a.style.display='block'; }
             localStorage.setItem('b',b); localStorage.setItem('p',p); localStorage.setItem('i',img); localStorage.setItem('l',lng);
-            const t = langData[lng];
-            document.getElementById('btn-shop').innerText = t.shop; document.getElementById('btn-wheel').innerText = t.wheel;
-            document.getElementById('h-shop').innerText = t.h_shop; document.getElementById('h-wheel').innerText = t.h_wheel;
-            document.getElementById('h-set').innerText = t.h_set; document.getElementById('p-price').innerText = t.price;
-            document.getElementById('spin-btn').innerText = t.spin; document.getElementById('btn-close-w').innerText = t.close;
-            document.getElementById('btn-close-s').innerText = t.close;
-            document.getElementById('m-btn').innerText = mus ? (lng==='RU'?"Музыка: ВКЛ":"Music: ON") : (lng==='RU'?"Музыка: ВЫКЛ":"Music: OFF");
-            document.getElementById('s-btn').innerText = snd ? (lng==='RU'?"Звуки: ВКЛ":"Sounds: ON") : (lng==='RU'?"Звуки: ВЫКЛ":"Sounds: OFF");
-            document.getElementById('l-btn').innerText = "Язык: " + lng;
         }
 
-        document.getElementById('beaver').onclick = () => {
-            b += p; if(snd){ const s=document.getElementById('hru'); s.volume=0.1; s.currentTime=0; s.play(); }
-            if(mus) { const m=document.getElementById('bgm'); m.volume=0.05; m.play(); } up();
-        };
-
-        function spin() {
-            if(isSpinning || b < 1000) return;
-            isSpinning = true; b -= 1000; up();
-            const deg = 1800 + Math.random() * 360; document.getElementById('wheel-img').style.transform = `rotate(${deg}deg)`;
-            setTimeout(() => {
-                const win = 1000 + Math.floor(Math.random() * 9001);
-                b += win; alert(langData[lng].win + win + " 💰!");
-                isSpinning = false; document.getElementById('wheel-img').style.transform = `rotate(0deg)`; up();
-            }, 3500);
-        }
+        document.getElementById('beaver').onclick = () => { b += p; up(); };
 
         function openP(id) {
             document.getElementById(id).style.display='block';
             if(id==='shop'){
                 const l = document.getElementById('list'); l.innerHTML='';
-                items.forEach((it, i) => { 
-                    l.innerHTML += `<div class="item"><div class="item-info"><img src="${it.i}"><span>${it.n[lng]} (+${it.pw})</span></div><button class="btn" onclick="buy(${i})">${it.p.toLocaleString()}</button></div>`; 
-                });
+                items.forEach((it, i) => { l.innerHTML += `<div class="item"><span>${it.n[lng]} (+${it.pw})</span><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; });
             }
         }
         function closeP(id){ document.getElementById(id).style.display='none'; }
         function buy(i) { if(b >= items[i].p) { b -= items[i].p; p += items[i].pw; img = items[i].i; up(); closeP('shop'); } }
-        function toggleM(){ mus=!mus; localStorage.setItem('m',mus?1:0); if(!mus) document.getElementById('bgm').pause(); else document.getElementById('bgm').play(); up(); }
-        function toggleS(){ snd=!snd; localStorage.setItem('s',snd?1:0); up(); }
-        function toggleL(){ lng = (lng === 'RU' ? 'EN' : 'RU'); up(); }
+        function toggleL(){ lng = (lng==='RU'?'EN':'RU'); document.getElementById('l-btn').innerText="Язык: "+lng; up(); }
         up();
     </script>
 </body>
 </html>
-
