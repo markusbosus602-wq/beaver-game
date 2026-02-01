@@ -5,51 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
         body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        #adm-top { position: fixed; top: 15px; right: 15px; z-index: 100; display: none; }
-        .stats { font-size: 36px; margin-top: 50px; font-weight: bold; color: #f1c40f; }
-        #game { width: 220px; height: 220px; margin: 30px auto; position: relative; }
+        #adm-btn { position: fixed; top: 10px; right: 10px; z-index: 100; display: none; }
+        .stats { font-size: 38px; margin-top: 40px; font-weight: bold; color: #f1c40f; }
+        
+        /* БОБЕР И СЛОЙ ВЕЩЕЙ */
+        #game { width: 220px; height: 220px; margin: 20px auto; position: relative; }
         #beaver { width: 100%; cursor: pointer; transition: 0.1s; position: relative; z-index: 1; }
-        #acc { position: absolute; width: 55%; top: 5%; left: 22%; z-index: 2; pointer-events: none; display: none; }
-        #beaver:active { transform: scale(0.95); }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 3px solid #e67e22; }
-        .btn { padding: 12px 18px; background: #e67e22; border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #acc { position: absolute; width: 50%; top: 8%; left: 25%; z-index: 2; pointer-events: none; display: none; }
+        #beaver:active { transform: scale(0.9); }
+
+        /* МЕНЮ СНИЗУ */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 10px; padding: 15px 0; border-top: 4px solid #e67e22; }
+        .btn { padding: 12px 18px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #d35400; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px #d35400; }
+
         #shop, #settings, #wheel-p, #admin-p { display: none; background: rgba(0,0,0,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; padding-top: 20px; overflow-y: auto; }
+        
+        /* КОЛЕСО */
         .wheel-box { position: relative; width: 240px; height: 240px; margin: 20px auto; }
         #wheel-img { width: 100%; transition: 3s cubic-bezier(0.1, 0, 0.1, 1); }
-        .item { background: #34495e; margin: 8px; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #7f8c8d; }
-        .item-info { display: flex; align-items: center; gap: 10px; }
-        .item img { width: 45px; height: 45px; background: #2c3e50; border-radius: 5px; }
-        .item-name { font-size: 14px; font-weight: bold; }
+
+        /* МАГАЗИН */
+        .item { background: #34495e; margin: 10px; padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #7f8c8d; }
+        .item-left { display: flex; align-items: center; gap: 10px; text-align: left; }
+        .item img { width: 50px; height: 50px; background: #2c3e50; border-radius: 8px; padding: 2px; }
+        .item-info b { font-size: 16px; color: #ecf0f1; }
+        .item-info p { margin: 0; font-size: 12px; color: #bdc3c7; }
     </style>
 </head>
 <body>
-    <div id="adm-top"><button class="btn" style="background:#c0392b; font-size:10px;" onclick="openP('admin-p')">⚙️ ADM</button></div>
+    <div id="adm-btn"><button class="btn" style="background:#c0392b; font-size:10px;" onclick="openP('admin-p')">⚙️ ADM</button></div>
     <div class="stats">💰 <span id="balance">0</span></div>
+    
     <div id="game">
         <img id="beaver" src="https://img.icons8.com/color/480/beaver.png">
         <img id="acc" src="">
     </div>
+
     <div class="bottom-nav">
         <button class="btn" onclick="openP('shop')">ШОП</button>
         <button class="btn" style="background:#9b59b6" onclick="openP('wheel-p')">УДАЧА</button>
         <button class="btn" style="background:#7f8c8d" onclick="openP('settings')">⚙️</button>
     </div>
+
     <div id="wheel-p">
-        <h3>КОЛЕСО</h3>
+        <h3>КОЛЕСО УДАЧИ</h3>
         <div class="wheel-box">
             <img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png">
         </div>
         <button class="btn" onclick="spin()">КРУТИТЬ (100 💰)</button><br><br>
         <button class="btn" onclick="closeP('wheel-p')">ЗАКРЫТЬ</button>
     </div>
+
     <div id="shop"><h3>МАГАЗИН</h3><div id="list"></div><button class="btn" onclick="closeP('shop')">ЗАКРЫТЬ</button></div>
+    
     <div id="settings">
         <h3>НАСТРОЙКИ</h3>
         <button class="btn" onclick="toggleM()" id="m-btn">Музыка: ON</button><br><br>
         <button class="btn" onclick="toggleS()" id="s-btn">Звуки: ON</button><br><br>
         <button class="btn" onclick="closeP('settings')">ОК</button>
     </div>
-    <div id="admin-p"><h3>АДМИНКА</h3><button class="btn" onclick="closeP('admin-p')">ЗАКРЫТЬ</button></div>
+
+    <div id="admin-p"><h3>АДМИНКА</h3><p>Команды в чате бота</p><button class="btn" onclick="closeP('admin-p')">ЗАКРЫТЬ</button></div>
 
     <audio id="snd-c" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
     <audio id="snd-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
@@ -57,16 +74,17 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        if(tg.initDataUnsafe.user?.id === 5693452271 || tg.initDataUnsafe.user?.username === "Kuiakanda") document.getElementById('adm-top').style.display = 'block';
+        if(tg.initDataUnsafe.user?.id === 5693452271 || tg.initDataUnsafe.user?.username === "Kuiakanda") document.getElementById('adm-btn').style.display = 'block';
 
-        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, mus = true, snd = true, img = localStorage.getItem('i') || "", isS = false;
+        let b = parseInt(localStorage.getItem('b')) || 0, p = parseInt(localStorage.getItem('p')) || 1, 
+            mus = true, snd = true, img = localStorage.getItem('i') || "", isS = false;
 
         const items = [
-            {n:"Кепка", p:50, pw:2, i:"https://img.icons8.com/color/200/baseball-cap.png"},
-            {n:"Очки", p:150, pw:5, i:"https://img.icons8.com/color/200/glasses.png"},
-            {n:"Усы", p:300, pw:10, i:"https://img.icons8.com/color/200/mustache.png"},
-            {n:"Шляпа", p:600, pw:20, i:"https://img.icons8.com/color/200/top-hat.png"},
-            {n:"Корона", p:2000, pw:100, i:"https://img.icons8.com/color/200/crown.png"}
+            {n:"Кепка", p:40, pw:2, i:"https://img.icons8.com/color/200/baseball-cap.png"},
+            {n:"Очки", p:120, pw:5, i:"https://img.icons8.com/color/200/glasses.png"},
+            {n:"Усы", p:250, pw:10, i:"https://img.icons8.com/color/200/mustache.png"},
+            {n:"Шляпа", p:500, pw:20, i:"https://img.icons8.com/color/200/top-hat.png"},
+            {n:"Корона", p:1500, pw:100, i:"https://img.icons8.com/color/200/crown.png"}
         ];
 
         function up() {
@@ -85,7 +103,7 @@
             if(isS || b < 100) return; isS = true; b -= 100; up();
             let w = document.getElementById('wheel-img');
             w.style.transform = `rotate(${1800 + Math.random() * 360}deg)`;
-            setTimeout(() => { b += Math.floor(Math.random()*1000); w.style.transform = 'rotate(0deg)'; isS = false; up(); }, 3000);
+            setTimeout(() => { b += Math.floor(Math.random()*1500); w.style.transform='rotate(0deg)'; isS=false; up(); }, 3000);
         }
 
         function openP(id) {
@@ -93,7 +111,7 @@
             if(id==='shop') {
                 let l = document.getElementById('list'); l.innerHTML='';
                 items.forEach((it, i) => { 
-                    l.innerHTML += `<div class="item"><div class="item-info"><img src="${it.i}"><div class="item-name">${it.n}<br><small>+${it.pw}</small></div></div><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; 
+                    l.innerHTML += `<div class="item"><div class="item-left"><img src="${it.i}"><div class="item-info"><b>${it.n}</b><p>+${it.pw} за клик</p></div></div><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; 
                 });
             }
         }
