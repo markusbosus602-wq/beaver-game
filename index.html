@@ -3,37 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Beaver Game</title>
     <style>
         body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        
-        /* Статистика сверху */
-        .stats { font-size: 36px; margin-top: 60px; font-weight: bold; color: #f1c40f; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        
-        /* Бобер по центру */
+        .stats { font-size: 36px; margin-top: 60px; font-weight: bold; color: #f1c40f; }
         #game { width: 240px; height: 240px; margin: 40px auto; position: relative; }
         #beaver { width: 100%; cursor: pointer; transition: 0.1s; }
         #beaver:active { transform: scale(0.9); }
-        
-        /* МЕНЮ СНИЗУ ЭКРАНА */
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            background: #34495e; 
-            display: flex; 
-            justify-content: center; 
-            gap: 15px; 
-            padding: 20px 0; 
-            border-top: 4px solid #e67e22;
-            z-index: 50;
-        }
-        
-        .btn { padding: 12px 20px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px #d35400; font-size: 14px; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px #d35400; }
-        
-        /* Окна панелей */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #34495e; display: flex; justify-content: center; gap: 15px; padding: 20px 0; border-top: 4px solid #e67e22; z-index: 50; }
+        .btn { padding: 12px 20px; background: #e67e22; border: none; color: white; border-radius: 10px; cursor: pointer; font-weight: bold; }
         #shop, #settings, #wheel-p { display: none; background: rgba(0,0,0,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; padding-top: 20px; }
         #wheel-img { width: 240px; transition: 3s cubic-bezier(0.1, 0, 0.1, 1); margin: 30px auto; display: block; }
         .item-list { height: 70vh; overflow-y: auto; padding: 15px; }
@@ -42,80 +19,46 @@
 </head>
 <body>
     <div class="stats">💰 <span id="balance">0</span></div>
-    
-    <div id="game">
-        <img id="beaver" src="https://cdn-icons-png.flaticon.com/512/3069/3069172.png">
-    </div>
-
+    <div id="game"><img id="beaver" src="https://cdn-icons-png.flaticon.com/512/3069/3069172.png"></div>
     <div class="bottom-nav">
         <button class="btn" onclick="openP('shop')">МАГАЗИН</button>
-        <button class="btn" style="background:#9b59b6; box-shadow: 0 4px #8e44ad;" onclick="openP('wheel-p')">КОЛЕСО</button>
-        <button class="btn" style="background:#7f8c8d; box-shadow: 0 4px #34495e;" onclick="openP('settings')">⚙️</button>
+        <button class="btn" style="background:#9b59b6" onclick="openP('wheel-p')">КОЛЕСО</button>
+        <button class="btn" style="background:#7f8c8d" onclick="openP('settings')">⚙️</button>
     </div>
-
     <div id="wheel-p">
-        <h3>🎡 КОЛЕСО УДАЧИ</h3>
-        <p>Цена спина: 1,000 💰</p>
+        <h3>КОЛЕСО</h3>
         <img id="wheel-img" src="https://cdn-icons-png.flaticon.com/512/2316/2316650.png">
         <button class="btn" onclick="spin()">КРУТИТЬ</button><br><br>
-        <button class="btn" style="background:#c0392b" onclick="closeP('wheel-p')">ЗАКРЫТЬ</button>
+        <button class="btn" onclick="closeP('wheel-p')">ЗАКРЫТЬ</button>
     </div>
-
     <div id="settings">
-        <h3>⚙️ НАСТРОЙКИ</h3>
+        <h3>НАСТРОЙКИ</h3>
         <button class="btn" onclick="toggleM()" id="m-btn">Музыка: ON</button><br><br>
         <button class="btn" onclick="toggleS()" id="s-btn">Звуки: ON</button><br><br>
-        <button class="btn" onclick="closeP('settings')">ГОТОВО</button>
+        <button class="btn" onclick="closeP('settings')">ОК</button>
     </div>
-
     <div id="shop">
-        <h3>🛒 МАГАЗИН ПРЕДМЕТОВ</h3>
+        <h3>МАГАЗИН</h3>
         <div id="list" class="item-list"></div>
-        <button class="btn" style="background:#c0392b" onclick="closeP('shop')">ЗАКРЫТЬ</button>
+        <button class="btn" onclick="closeP('shop')">ЗАКРЫТЬ</button>
     </div>
-
     <audio id="snd-c" src="https://www.myinstants.com/media/sounds/crunch.mp3"></audio>
     <audio id="snd-m" src="https://www.bensound.com/bensound-music/bensound-buddy.mp3" loop></audio>
-
     <script>
         let b = parseInt(localStorage.getItem('b')) || 0, p = 1, mus = true, snd = true, isS = false;
         const items = []; for(let i=1; i<=30; i++) items.push({n: "Улучшение "+i, p: i*700, pw: i*3});
-
-        function up() {
-            document.getElementById('balance').innerText = b.toLocaleString();
-            localStorage.setItem('b', b);
+        function up() { document.getElementById('balance').innerText = b.toLocaleString(); localStorage.setItem('b', b);
             document.getElementById('m-btn').innerText = "Музыка: " + (mus ? "ON" : "OFF");
-            document.getElementById('s-btn').innerText = "Звуки: " + (snd ? "ON" : "OFF");
-        }
-
-        document.getElementById('beaver').onclick = () => {
-            b += p;
-            if(snd) { let s = document.getElementById('snd-c'); s.currentTime=0; s.volume=0.2; s.play(); }
-            if(mus) { let m = document.getElementById('snd-m'); if(m.paused) m.play(); m.volume=0.1; }
-            up();
-        };
-
-        function spin() {
-            if(isS || b < 1000) return; isS = true; b -= 1000; up();
-            let deg = 1800 + Math.random() * 360;
-            document.getElementById('wheel-img').style.transform = `rotate(${deg}deg)`;
-            setTimeout(() => { 
-                b += Math.floor(Math.random()*7000); 
-                isS = false; 
-                document.getElementById('wheel-img').style.transform = `rotate(0deg)`; 
-                up(); 
-            }, 3000);
-        }
-
-        function openP(id) {
-            document.getElementById(id).style.display='block';
-            if(id==='shop') {
-                let l = document.getElementById('list'); l.innerHTML='';
-                items.forEach((it, i) => { 
-                    l.innerHTML += `<div class="item"><span>${it.n} (+${it.pw})</span><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; 
-                });
-            }
-        }
+            document.getElementById('s-btn').innerText = "Звуки: " + (snd ? "ON" : "OFF"); }
+        document.getElementById('beaver').onclick = () => { b += p;
+            if(snd) { let s = document.getElementById('snd-c'); s.currentTime=0; s.play(); }
+            if(mus) { let m = document.getElementById('snd-m'); if(m.paused) m.play(); } up(); };
+        function spin() { if(isS || b < 1000) return; isS = true; b -= 1000; up();
+            document.getElementById('wheel-img').style.transform = `rotate(${1800 + Math.random() * 360}deg)`;
+            setTimeout(() => { b += Math.floor(Math.random()*7000); isS = false; document.getElementById('wheel-img').style.transform = `rotate(0deg)`; up(); }, 3000); }
+        function openP(id) { document.getElementById(id).style.display='block';
+            if(id==='shop') { let l = document.getElementById('list'); l.innerHTML='';
+                items.forEach((it, i) => { l.innerHTML += `<div class="item"><span>${it.n} (+${it.pw})</span><button class="btn" onclick="buy(${i})">${it.p}</button></div>`; }); } }
         function closeP(id) { document.getElementById(id).style.display='none'; }
         function buy(i) { if(b >= items[i].p) { b -= items[i].p; p += items[i].pw; up(); closeP('shop'); } }
         function toggleM() { mus = !mus; let m = document.getElementById('snd-m'); if(!mus) m.pause(); else m.play(); up(); }
